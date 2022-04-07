@@ -6,13 +6,17 @@ import (
 	"net/http"
 )
 
+//Responsebody for crawler request.
 type Responsebody struct {
 	Url  string
 	Data string
 }
 
-func crawl(api string) (string, error) {
-	resp, err := http.Get(api)
+//crawl: function to crawl over link
+//input: link
+//output: Responsebody,error
+func crawl(link string) (string, error) {
+	resp, err := http.Get(link)
 	if err != nil {
 		fmt.Println(err.Error())
 		return "", err
@@ -25,12 +29,17 @@ func crawl(api string) (string, error) {
 	return string(body), nil
 }
 
-func Webcrawler() ([]Responsebody, error) {
+//Webcrawler: function to handle multiple links
+//input: string array of links.
+//output: responsebody arr and error.
+func Webcrawler(links []string) ([]Responsebody, error) {
 	var resp []Responsebody
 
-	links := []string{"https://www.google.com", "https://en.wikipedia.org/wiki/Ant-Man_(film)"}
 	for _, link := range links {
-		data, _ := crawl(link)
+		data, err := crawl(link)
+		if err != nil {
+			continue
+		}
 		resp = append(resp, Responsebody{
 			Url:  link,
 			Data: data,
@@ -38,6 +47,8 @@ func Webcrawler() ([]Responsebody, error) {
 	}
 	if len(resp) == 0 {
 		return resp, fmt.Errorf("none of the data can be fetched")
+	} else if len(resp) < len(links) {
+		return resp, fmt.Errorf("some of the data can be fetched")
 	}
 
 	return resp, nil
